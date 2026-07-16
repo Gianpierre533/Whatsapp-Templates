@@ -107,10 +107,39 @@
         <aside id="panel-stats" class="bg-slate-100 rounded-lg p-3"></aside>
 
         <ul id="listaPlantillas" class="grid gap-3 sm:grid-cols-2"></ul>
+
+        <!-- HU4 y Logro 1: Barra de estado, vaciar y exportar -->
+        <div
+          class="flex items-center justify-between border-t border-slate-200 pt-3 mt-1"
+        >
+          <p
+            id="estado"
+            class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full"
+          >
+            Listo
+          </p>
+          <div class="flex gap-2">
+            <!-- LOGRO 1: Botón Exportar -->
+            <button
+              id="btn-exportar"
+              class="text-xs px-3 py-1.5 rounded-md border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
+            >
+              Exportar
+            </button>
+            <button
+              id="btn-vaciar"
+              class="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition"
+            >
+              Vaciar todo
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
     <script src="js/models/Template.js"></script>
+    <script src="js/persistence.js"></script>
+    <!-- ← HU1: Se carga antes de app.js -->
     <script src="js/app.js"></script>
   </body>
 </html>

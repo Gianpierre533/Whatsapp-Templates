@@ -26,3 +26,14 @@ Le puse un solo "escuchador" de clics al contenedor padre (`<ul id="listaPlantil
 Para mostrar el resumen en la parte superior, creé la función `contarPorHashtag`. Esta es una **función pura**: recibe el arreglo actual de plantillas, lo recorre y devuelve un objeto nuevo que contiene el conteo de cuántas veces se repite cada hashtag. No modifica variables externas ni el estado original; solo entra un dato y sale un resultado.
 
 Con ese resultado, puedo dibujar etiquetas dinámicas en el panel (ej. `#ventas · 2`) que se actualizan automáticamente en cada `render()`.
+
+## 💾 Persistencia de Datos (Lab 15)
+
+**¿Cómo guardo y cargo el estado?**
+Para que las plantillas no se borren al recargar la página, guardo los datos en la memoria del navegador usando `localStorage`.
+
+- **Para guardar:** Como `localStorage` solo acepta texto plano, utilizo `JSON.stringify(state.plantillas)` para convertir mi arreglo de objetos en una cadena de texto antes de guardarlo con `setItem()`.
+- **Para cargar:** Al iniciar la app, hago el proceso inverso. Recupero el texto con `getItem()` y uso `JSON.parse()` para convertir ese texto de vuelta a un arreglo real de JavaScript.
+
+**¿Por qué uso try/catch al parsear?**
+Utilizo un bloque `try/catch` como medida de seguridad. La función `JSON.parse()` es muy estricta y "explota" (lanza un error fatal que detiene la ejecución del código) si el texto que intenta leer está corrupto o mal formado. Al envolverlo en `try/catch`, le digo a la app: "Intenta leer esto; si falla porque los datos están rotos, no te cuelgues, simplemente atrapa el error y arranca de cero con una lista vacía".

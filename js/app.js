@@ -1,28 +1,30 @@
-const state = { plantillas: [] };          // ← la única fuente de verdad
+const state = { 
+  plantillas: cargar(), 
+  editandoId: null,
+  filtro: localStorage.getItem(CLAVE_FILTRO) ?? "" 
+}; 
 
 function agregarPlantilla(titulo, mensaje, hashtag) {
   const nueva = new Template(titulo, mensaje, hashtag);
-  state.plantillas.push(nueva);   // agrega la nueva plantilla al estado
+  state.plantillas.push(nueva); 
 }
 
 const lista = document.getElementById("listaPlantillas");
 
-// --- HU4: Función derivada para filtrar plantillas ---
 function plantillasVisibles() {
   const filtroTexto = (state.filtro ?? "").toLowerCase();
   if (filtroTexto === "") return state.plantillas;
   return state.plantillas.filter(plantilla => plantilla.hashtag.toLowerCase().includes(filtroTexto));
 }
 
-// --- HU3: Estadísticas - Función Pura ---
 function contarPorHashtag(plantillas) {
-  const conteo = {};                              // "caja" vacía
+  const conteo = {};                              
   plantillas.forEach(function (plantilla) {
     const elHashtag = plantilla.hashtag;
     if (conteo[elHashtag]) {
-      conteo[elHashtag] = conteo[elHashtag] + 1;  // si ya existe, suma 1
+      conteo[elHashtag] = conteo[elHashtag] + 1;  
     } else {
-      conteo[elHashtag] = 1;                      // si es nuevo, empieza en 1
+      conteo[elHashtag] = 1;                      
     }
   });
   return conteo;
@@ -36,7 +38,6 @@ function renderStats() {
       `<span class="text-xs bg-white border border-slate-200 px-2 py-0.5 rounded-full">${hashtag} · ${cantidad}</span>`)
     .join("");
     
-  // LOGRO 2: Calcular el hashtag más usado
   let masUsadoHTML = "";
   if (total > 0) {
     const masUsado = Object.entries(porTag).sort((a, b) => b[1] - a[1])[0];
@@ -48,20 +49,26 @@ function renderStats() {
       <span class="text-sm font-semibold text-slate-700">${total} plantilla(s)</span>
       ${etiquetas}
     </div>
-    ${masUsadoHTML}`; // ← Se agrega el HTML del logro 2
+    ${masUsadoHTML}`; 
 }
 
 function render() {
-  lista.innerHTML = "";                       // 1. limpia lo anterior
+  lista.innerHTML = "";                       
   plantillasVisibles().forEach(function (plantilla) {
-    const fechaTexto = plantilla.fecha.toLocaleDateString("es-PE");   // Date → texto legible
+    const fechaCreacion = new Date(plantilla.fecha).toLocaleDateString("es-PE"); 
+    
+    // LOGRO 3: Modificamos el texto si la plantilla tiene una fecha de edición
+    const textoFecha = plantilla.editadaEl 
+      ? `${fechaCreacion} (Editada)` 
+      : fechaCreacion;
+    
     const li = document.createElement("li");
     li.className = "bg-white p-4 rounded-lg shadow";
-    // HU1 y HU2: Se agregaron los botones de Editar y Eliminar con data-id
     li.innerHTML = `
       <div class="flex items-start justify-between gap-2">
         <strong class="text-slate-800">${plantilla.titulo}</strong>
-        <span class="text-xs text-slate-400 shrink-0">${fechaTexto}</span>
+        <!-- Mostramos la variable textoFecha que armamos arriba -->
+        <span class="text-xs text-slate-400 shrink-0">${textoFecha}</span>
       </div>
       <p class="text-sm text-slate-600 mt-1">${plantilla.mensaje}</p>
       <span class="inline-block text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full mt-2">${plantilla.hashtag}</span>
@@ -69,28 +76,26 @@ function render() {
         <button class="btn-editar text-xs px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 hover:bg-blue-100 transition" data-id="${plantilla.id}">Editar</button>
         <button class="btn-eliminar text-xs px-2.5 py-1 rounded-md bg-red-50 text-red-600 hover:bg-red-100 transition" data-id="${plantilla.id}">Eliminar</button>
       </div>`;
-    lista.appendChild(li);                     // 2. agrega un nodo por dato
+    lista.appendChild(li);                     
   });
   
   renderSelector(); 
-  renderStats(); // HU3: Mantener las estadísticas actualizadas al final del render
+  renderStats(); 
+  guardar(); 
 }
 
 const form = document.getElementById("form-plantilla");
 const titulo = document.getElementById("titulo");
 const mensaje = document.getElementById("mensaje");
 const hashtag = document.getElementById("hashtag");
-
-// LOGRO 1: Capturamos los botones nuevos para el modo edición
 const btnSubmit = document.getElementById("btn-submit");
 const btnCancelar = document.getElementById("btn-cancelar");
 
 function normalizarHashtag(texto) {
-  const limpio = texto.trim().toLowerCase();           // sin espacios, en minúscula
-  return limpio.startsWith("#") ? limpio : "#" + limpio; // asegura el #
+  const limpio = texto.trim().toLowerCase();           
+  return limpio.startsWith("#") ? limpio : "#" + limpio; 
 }
 
-// LOGRO 1: Función para resetear el formulario y sus botones
 function restaurarFormulario() {
   form.reset();
   state.editandoId = null;
@@ -104,31 +109,33 @@ form.addEventListener("submit", function (evento) {
   const tituloTexto = titulo.value.trim();
   const mensajeTexto = mensaje.value.trim();
 
-  if (tituloTexto.length === 0 || mensajeTexto.length === 0) {              // validación
+  if (tituloTexto.length === 0 || mensajeTexto.length === 0) {              
     alert("Título y mensaje son obligatorios");
     return;
   }
 
-  // HU2: Modificar comportamiento del submit para crear o editar
   if (state.editandoId) {
-    state.plantillas = state.plantillas.map(plantilla =>     // actualiza solo esa, sin mutar
-      plantilla.id === state.editandoId ? { ...plantilla, titulo: tituloTexto, mensaje: mensajeTexto, hashtag: normalizarHashtag(hashtag.value) } : plantilla
+    state.plantillas = state.plantillas.map(plantilla =>     
+      plantilla.id === state.editandoId ? { 
+        ...plantilla, 
+        titulo: tituloTexto, 
+        mensaje: mensajeTexto, 
+        hashtag: normalizarHashtag(hashtag.value),
+        editadaEl: new Date() // LOGRO 3: Registramos la fecha de edición
+      } : plantilla
     );
-    // state.editandoId = null; (Lo manejamos ahora en restaurarFormulario)
   } else {
     agregarPlantilla(tituloTexto, mensajeTexto, normalizarHashtag(hashtag.value));
   }
   
   render();
-  restaurarFormulario(); // LOGRO 1: Reemplaza a form.reset()
+  restaurarFormulario(); 
 });
 
-// LOGRO 1: Evento para el botón cancelar
 btnCancelar.addEventListener("click", restaurarFormulario);
 
-// --- HU1 y HU2: Delegación de eventos para Eliminar y Editar ---
 function eliminarPlantilla(id) {
-  state.plantillas = state.plantillas.filter(plantilla => plantilla.id !== id);  // sin mutar: filtra
+  state.plantillas = state.plantillas.filter(plantilla => plantilla.id !== id);  
   render();
 }
 
@@ -137,9 +144,8 @@ function cargarEnFormulario(id) {
   titulo.value = plantilla.titulo;
   mensaje.value = plantilla.mensaje;
   hashtag.value = plantilla.hashtag;
-  state.editandoId = id;          // recordamos que estamos editando, no creando
+  state.editandoId = id;          
   
-  // LOGRO 1: Cambiar la apariencia para modo edición
   btnCancelar.classList.remove("hidden");
   btnSubmit.textContent = "Guardar cambios";
   btnSubmit.classList.replace("bg-emerald-600", "bg-blue-600");
@@ -147,24 +153,18 @@ function cargarEnFormulario(id) {
 
 lista.addEventListener("click", function (evento) {
   const id = evento.target.dataset.id;
-  
-  // LOGRO 3: Confirmación simple antes de borrar
   if (evento.target.classList.contains("btn-eliminar")) {
     if (confirm("¿Estás seguro de que deseas eliminar esta plantilla?")) {
       eliminarPlantilla(id);
     }
   }
-  
   if (evento.target.classList.contains("btn-editar"))   cargarEnFormulario(id);
 });
 
-// --- HU4: Escuchador del Buscador ---
 document.getElementById("buscador").addEventListener("input", function (evento) {
-  state.filtro = evento.target.value;   // el filtro vive en el estado
-  render();                             // mismo render, datos distintos
+  state.filtro = evento.target.value;   
+  render();                             
 });
-
-// --- Lab 13: Usar la plantilla — generador de mensaje ---
 
 function generarMensajeFinal(plantilla, valorNombre) {
   return plantilla.mensaje.replaceAll("{nombre}", valorNombre);
@@ -174,15 +174,15 @@ const selector = document.getElementById("selector");
 
 function renderSelector() {
   selector.innerHTML = state.plantillas
-    .map((plantilla, indice) => `<option value="${indice}">${plantilla.titulo}</option>`)   // value = posición en el array
+    .map((plantilla, indice) => `<option value="${indice}">${plantilla.titulo}</option>`)   
     .join("");
 }
 
 const salida = document.getElementById("mensaje-final");
 
 document.getElementById("btn-generar").addEventListener("click", function () {
-  if(state.plantillas.length === 0) return; // Validación por si no hay plantillas
-  const plantilla = state.plantillas[Number(selector.value)];   // la elegida en el select
+  if(state.plantillas.length === 0) return; 
+  const plantilla = state.plantillas[Number(selector.value)];   
   const nombre = document.getElementById("valorNombre").value.trim();
   salida.textContent = generarMensajeFinal(plantilla, nombre);
 });
@@ -190,3 +190,20 @@ document.getElementById("btn-generar").addEventListener("click", function () {
 document.getElementById("btn-copiar").addEventListener("click", function () {
   navigator.clipboard.writeText(salida.textContent);
 });
+
+document.getElementById("btn-vaciar").addEventListener("click", function () {
+  state.plantillas = [];
+  render(); 
+});
+
+// --- LOGRO 1: Botón Exportar a consola ---
+document.getElementById("btn-exportar").addEventListener("click", function() {
+  console.log("=== TUS PLANTILLAS GUARDADAS ===");
+  // El tercer parámetro "2" le pone sangría bonita (indentación) al texto
+  console.log(JSON.stringify(state.plantillas, null, 2));
+  alert("¡Datos exportados! Abre la consola del navegador (F12) para verlos.");
+});
+
+// --- INICIO DE LA APP ---
+document.getElementById("buscador").value = state.filtro; 
+render();
