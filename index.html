@@ -6,8 +6,11 @@
     <title>Plantillas WhatsApp</title>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body class="bg-slate-100 min-h-screen p-6">
-    <h1 class="text-3xl font-bold text-center text-slate-800 mb-6">
+  <body class="bg-slate-100 min-h-screen p-6 relative">
+    <!-- Título con gradiente esmeralda -->
+    <h1
+      class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-400 text-center mb-6"
+    >
       Mis Plantillas
     </h1>
 
@@ -17,29 +20,30 @@
           id="form-plantilla"
           class="bg-white p-4 rounded-xl shadow grid gap-2"
         >
+          <!-- Inputs con anillos de enfoque esmeralda -->
           <input
             id="titulo"
             type="text"
             placeholder="Título"
-            class="p-2 border border-slate-300 rounded"
+            class="p-2 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
           />
           <input
             id="hashtag"
             type="text"
             placeholder="hashtag"
-            class="p-2 border border-slate-300 rounded"
+            class="p-2 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
           />
           <textarea
             id="mensaje"
             rows="3"
             placeholder="Mensaje (usa {nombre})"
-            class="p-2 border border-slate-300 rounded"
+            class="p-2 border border-slate-300 rounded focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
           ></textarea>
 
           <button
             id="btn-submit"
             type="submit"
-            class="bg-emerald-600 text-white py-2 rounded transition"
+            class="bg-emerald-600 text-white py-2 rounded hover:bg-emerald-700 transition"
           >
             Agregar plantilla
           </button>
@@ -61,7 +65,7 @@
             Plantilla
             <select
               id="selector"
-              class="p-2 border border-slate-300 rounded text-slate-800"
+              class="p-2 border border-slate-300 rounded text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
             ></select>
           </label>
           <label class="grid gap-1 text-xs text-slate-500">
@@ -70,7 +74,7 @@
               id="valorNombre"
               type="text"
               placeholder="ej. Ana"
-              class="p-2 border border-slate-300 rounded text-slate-800"
+              class="p-2 border border-slate-300 rounded text-slate-800 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
             />
           </label>
           <button
@@ -89,7 +93,7 @@
             ></p>
             <button
               id="btn-copiar"
-              class="justify-self-end text-xs text-emerald-700 hover:text-emerald-800"
+              class="justify-self-end text-xs text-emerald-700 hover:text-emerald-800 font-medium"
             >
               📋 Copiar
             </button>
@@ -98,48 +102,84 @@
       </div>
 
       <div class="grid gap-4 content-start">
-        <input
-          id="buscador"
-          type="text"
-          placeholder="Filtra por hashtag…"
-          class="w-full p-2 border border-slate-300 rounded-lg"
-        />
+        <!-- HU4 y Logro 3: Barra de controles superior -->
+        <div class="grid grid-cols-[1fr_auto] gap-2">
+          <div class="relative flex items-center">
+            <input
+              id="buscador"
+              type="text"
+              placeholder="Filtra por hashtag…"
+              class="w-full p-2 border border-slate-300 rounded-lg pr-8 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+            />
+            <button
+              id="btn-limpiar-filtro"
+              class="absolute right-2 text-slate-400 hover:text-slate-600 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+          <select
+            id="orden"
+            class="p-2 border border-slate-300 rounded-lg text-slate-700 focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
+          >
+            <option value="recientes">Más recientes</option>
+            <option value="antiguas">Más antiguas</option>
+            <option value="alfabetico">Alfabético</option>
+          </select>
+        </div>
+
         <aside id="panel-stats" class="bg-slate-100 rounded-lg p-3"></aside>
 
         <ul id="listaPlantillas" class="grid gap-3 sm:grid-cols-2"></ul>
 
-        <!-- HU4 y Logro 1: Barra de estado, vaciar y exportar -->
         <div
           class="flex items-center justify-between border-t border-slate-200 pt-3 mt-1"
         >
           <p
             id="estado"
-            class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full"
+            class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full font-medium"
           >
             Listo
           </p>
-          <div class="flex gap-2">
-            <!-- LOGRO 1: Botón Exportar -->
-            <button
-              id="btn-exportar"
-              class="text-xs px-3 py-1.5 rounded-md border border-blue-200 text-blue-600 hover:bg-blue-50 transition"
-            >
-              Exportar
-            </button>
-            <button
-              id="btn-vaciar"
-              class="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 transition"
-            >
-              Vaciar todo
-            </button>
-          </div>
+          <button
+            id="btn-vaciar"
+            class="text-xs px-3 py-1.5 rounded-md border border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition"
+          >
+            Vaciar todo
+          </button>
         </div>
       </div>
     </div>
 
-    <script src="js/models/Template.js"></script>
-    <script src="js/persistence.js"></script>
-    <!-- ← HU1: Se carga antes de app.js -->
-    <script src="js/app.js"></script>
+    <!-- HU1: Modal de confirmación -->
+    <div
+      id="modal"
+      class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 transition-opacity"
+    >
+      <div
+        class="bg-white p-6 rounded-2xl shadow-xl max-w-sm w-full text-center transform transition-all"
+      >
+        <p id="modal-texto" class="text-slate-800 font-medium text-lg mb-5">
+          ¿Seguro?
+        </p>
+        <div class="flex gap-3 justify-center">
+          <button
+            id="modal-cancelar"
+            class="px-5 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium transition"
+          >
+            Cancelar
+          </button>
+          <button
+            id="modal-confirmar"
+            class="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-medium shadow-md hover:shadow-lg transition"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- El script principal como módulo  -->
+    <script type="module" src="js/app.js"></script>
   </body>
 </html>
