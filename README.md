@@ -37,3 +37,25 @@ Para que las plantillas no se borren al recargar la página, guardo los datos en
 
 **¿Por qué uso try/catch al parsear?**
 Utilizo un bloque `try/catch` como medida de seguridad. La función `JSON.parse()` es muy estricta y "explota" (lanza un error fatal que detiene la ejecución del código) si el texto que intenta leer está corrupto o mal formado. Al envolverlo en `try/catch`, le digo a la app: "Intenta leer esto; si falla porque los datos están rotos, no te cuelgues, simplemente atrapa el error y arranca de cero con una lista vacía".
+
+# 📱 Gestor de Plantillas para WhatsApp (Sesion 16)
+
+Esta es una aplicación web diseñada para crear, gestionar y utilizar plantillas de mensajes de forma eficiente. La app permite organizar mensajes frecuentes mediante hashtags, facilitando su búsqueda y generación personalizada con nombres dinámicos.
+
+## 🏗️ Arquitectura Modular (ESM)
+
+Para garantizar un código escalable y fácil de mantener, la aplicación utiliza **Módulos de ECMAScript (ESM)**. Esta arquitectura divide la lógica en archivos especializados que se comunican entre sí mediante `import` y `export`, eliminando la dependencia de variables globales y mejorando la organización:
+
+- **`models/Template.js`**: Define la clase `Template` que actúa como el modelo de datos básico para cada mensaje.
+- **`state.js`**: Es la "fuente de la verdad". Gestiona el estado centralizado de la app (plantillas, filtros y ordenamiento) y contiene la lógica de negocio pura (filtrado y orden).
+- **`storage.js`**: Maneja exclusivamente la capa de persistencia, centralizando las operaciones de lectura y escritura en el `localStorage`.
+- **`ui.js`**: Controla toda la interfaz de usuario, incluyendo el renderizado dinámico del DOM, la gestión de eventos (clics, inputs) y la interacción con el usuario mediante un modal personalizado.
+- **`app.js`**: Actúa como el punto de entrada principal, importando los módulos necesarios para arrancar la aplicación.
+
+## 💾 Persistencia de Datos
+
+La aplicación garantiza que la información no se pierda al recargar la página mediante el uso de `localStorage`:
+
+1.  **Serialización (Guardado)**: Al realizar cualquier cambio, utilizo `JSON.stringify()` para convertir el array de objetos de JavaScript en una cadena de texto, permitiendo que el navegador pueda almacenarlo.
+2.  **Deserialización (Carga)**: Al iniciar, utilizo `JSON.parse()` para reconstruir el texto almacenado en objetos utilizables por la aplicación.
+3.  **Seguridad (Try/Catch)**: Para evitar que la aplicación falle ante datos corruptos en el `localStorage`, el proceso de carga está envuelto en un bloque `try/catch`. Si los datos no son válidos, la app captura el error, lo registra en consola y reinicia el estado de forma segura sin romper la experiencia del usuario.
